@@ -1,5 +1,1 @@
-*
-!.gitignore
-!docker-compose.yml
-!.env
-!create-db.sql
+data/
