@@ -1,0 +1,1 @@
+# Example configuration for Ory Kratos
