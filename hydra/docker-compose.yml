@@ -1,0 +1,49 @@
+version: '3.7'
+services:
+  hydra-migrate:
+    image: oryd/hydra:v2.1.1
+    environment:
+      - DSN=postgres://postgres:123456aA@@citus:5432/hydra?sslmode=disable&max_conns=20&max_idle_conns=4
+    volumes:
+      - type: bind
+        source: ./hydra
+        target: /etc/config/hydra
+    command: migrate -c /etc/config/hydra/hydra.yml sql -e --yes
+    restart: on-failure
+    networks:
+      - base-project
+
+  consent:
+    environment:
+      - HYDRA_ADMIN_URL=http://hydra:4445
+    image: oryd/hydra-login-consent-node:v2.1.1
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    networks:
+      - base-project
+
+  hydra:
+    image: oryd/hydra:v2.1.1
+    ports:
+      - "4444:4444" # Public port
+      - "4445:4445" # Admin port
+      - "5555:5555" # Port for hydra token user
+    command: serve -c /etc/config/hydra/hydra.yml all --dev
+    volumes:
+      - type: bind
+        source: ./hydra
+        target: /etc/config/hydra
+    environment:
+      - DSN=postgres://postgres:123456aA@@citus:5432/hydra?sslmode=disable&max_conns=20&max_idle_conns=4
+      - STRATEGIES_ACCESS_TOKEN=jwt
+      - OIDC_SUBJECT_IDENTIFIERS_SUPPORTED_TYPES=public
+    restart: unless-stopped
+    depends_on:
+      - hydra-migrate
+    networks:
+      - base-project
+
+networks:
+  base-project:
+    external: true

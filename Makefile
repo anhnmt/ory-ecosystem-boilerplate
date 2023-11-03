@@ -1,12 +1,15 @@
 
-clean:
+docker.clean:
 	docker system prune -a -f
 
-network:
+docker.network:
 	docker network create base-project
 
-citus:
+docker.citus:
 	docker compose -f ./citus/docker-compose.yml up -d --force-recreate
 
-kratos:
+docker.kratos:
 	docker compose -f ./kratos/docker-compose.yml up -d --force-recreate
+
+docker.hydra:
+	docker compose -f ./hydra/docker-compose.yml up -d --force-recreate
